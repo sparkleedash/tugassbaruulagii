@@ -2,8 +2,10 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
-    static ArrayList<ArrayList<String>> bookList = new ArrayList<>();
+    static ArrayList<Book> bookList = new ArrayList<>();
     static ArrayList<Student> studentList = new ArrayList<>();
+
+    static String choice = "";
 
     public static void main(String[] args) {
         BookList();
@@ -11,27 +13,16 @@ public class Main {
         menu();
     }
 
+
     static void BookList() {
-        ArrayList<String> stokBuku = new ArrayList<>();
-        ArrayList<String> author = new ArrayList<>();
-        ArrayList<String> idBuku = new ArrayList<>();
-        ArrayList<String> judul = new ArrayList<>();
 
-        stokBuku.add("10");
-        author.add("Nancy Springer");
-        idBuku.add("1");
-        judul.add("The Left-Handed Lady");
+        Book book1 = new Book(Admin.generateId(), "The Left-Handed Lady", "Nancy Springer", "10");
+        Book book2 = new Book(Admin.generateId(), "The Gypsy Goodbye", "Nancy Springer", "5");
 
-        stokBuku.add("5");
-        author.add("Nancy Springer");
-        idBuku.add("2");
-        judul.add("The Gypsy Goodbye");
-
-        bookList.add(stokBuku);
-        bookList.add(author);
-        bookList.add(idBuku);
-        bookList.add(judul);
+        bookList.add(book1);
+        bookList.add(book2);
     }
+
 
     static void StudentList() {
         Student student1 = new Student();
@@ -50,6 +41,8 @@ public class Main {
         studentList.add(student2);
     }
 
+
+
     static void menu() {
         System.out.println("==== Library System ====");
         System.out.println("1. Login as Student");
@@ -59,6 +52,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Choose option (1-3): ");
         int option = scanner.nextInt();
+        scanner.nextLine();
 
         switch (option) {
             case 1:
@@ -73,19 +67,19 @@ public class Main {
             case 2:
                 System.out.println("==== Admin Menu ====");
 
+                Admin admin = new Admin();
+
                 System.out.print("Enter username: ");
-                String username = scanner.nextLine();
-                scanner.nextLine();
+                admin.adminUsername= scanner.nextLine();
 
                 System.out.print("Enter password: ");
-                String password = scanner.nextLine();
+                admin.adminPassword = scanner.nextLine();
 
-                if (!username.equals("admin") && !password.equals("admin")) {
-                    System.out.println("Invalid credentials for admin.\n");
-                    menu();
+                if (admin.isAdmin()) {
+                    menuAdmin();
                 }
                 else {
-                    menuAdmin();
+                    menu();
                 }
                 break;
             case 3:
@@ -96,6 +90,7 @@ public class Main {
                 menu();
         }
     }
+
 
     static Student loginStudent() {
         Scanner scanner = new Scanner(System.in);
@@ -121,64 +116,74 @@ public class Main {
 
 
     static void menuStudent(Student student) {
-        System.out.println("==== Student Menu ====");
+        //System.out.println("Logged in as " + student.name);
+        System.out.println("==== Student Menu " + student.name + " ====");
         System.out.println("1. Buku Terpinjam");
         System.out.println("2. Pinjam Buku");
         System.out.println("3. Logout");
+        System.out.println("4. Kembalikan Buku");
+        System.out.println("5. Student info");
 
         Scanner scanner = new Scanner(System.in);
         System.out.print("Choose option (1-3): ");
         int option = scanner.nextInt();
+        scanner.nextLine();
 
         switch (option) {
             case 1:
-                student.displayBorrowedBooks(bookList);
+                student.showBorrowedBooks(bookList);
                 menuStudent(student);
                 break;
             case 2:
-                Student.displayBooks(bookList);
-                System.out.println("Enter the ID of the book you want to borrow (enter 99 to go back):");
-                int bookId = scanner.nextInt();
+                do {
 
-                if (bookId == 99) {
-                    menuStudent(student);
-                    return;
-                }
+                    Student.displayBooks(bookList);
+                    System.out.println("Enter the ID of the book you want to borrow (enter 99 to go back):");
+                    int bookId = scanner.nextInt();
 
-                borrowBook(bookId, student);
+                    if (bookId == 99) {
+                        menuStudent(student);
+                        return;
+                    }
+
+                    User.addBook(bookId, student, bookList);
+
+
+                    System.out.println("Berapa Lama buku akan dipinjam? (Maksimal 14 hari)");
+                    System.out.print("Input lama (Hari): ");
+                    int hari = scanner.nextInt();
+
+                    scanner.nextLine();
+
+                    System.out.println("Do you want to borrow anpther book? (Y/N):");
+                    choice = scanner.nextLine();
+                }while(!choice.equals("N") && !choice.equals("n"));
                 menuStudent(student);
                 break;
             case 3:
                 menu();
                 break;
+            case 4:
+                Student.returnBooks(student);
+                menuStudent(student);
+                break;
+            case 5:
+                Student.displayInfo(student);
+                menuStudent(student);
             default:
                 System.out.println("Invalid option. Please choose again.");
                 menuStudent(student);
         }
     }
 
-    static void borrowBook(int bookId, Student student) {
-        int index = bookId - 1;
-        if (index >= 0 && index < bookList.get(0).size()) {
-            int stock = Integer.parseInt(bookList.get(0).get(index));
-            if (stock > 0) {
-                stock--;
-                bookList.get(0).set(index, String.valueOf(stock));
-                student.borrowedBooks.add(String.valueOf(bookId));
-                System.out.println("Book borrowed successfully.");
-            } else {
-                System.out.println("Sorry, the book is out of stock.");
-            }
-        } else {
-            System.out.println("Invalid book ID.");
-        }
-    }
+
 
     static void menuAdmin() {
         System.out.println("==== Admin Menu ====");
         System.out.println("1. Add Student");
         System.out.println("2. Display registered Students");
         System.out.println("3. Logout");
+        System.out.println("4. input book");
 
         Scanner scanner = new Scanner(System.in);
         System.out.print("Choose Option (1-3): ");
@@ -195,6 +200,10 @@ public class Main {
                 break;
             case 3:
                 menu();
+                break;
+            case 4:
+                Admin.inputBook();
+                menuAdmin();
                 break;
             default:
                 System.out.println("Invalid option. Please choose again.");

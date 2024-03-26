@@ -1,9 +1,50 @@
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.UUID;
 
 public class Admin {
     String adminUsername;
     String adminPassword;
+    static ArrayList<Student> studentList = new ArrayList<>();
+    static ArrayList<Book> bookList = new ArrayList<>();
+
+    static void inputBook() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Select book category:");
+        System.out.println("1. Story book");
+        System.out.println("2. History book");
+        System.out.println("3. Text book");
+        System.out.print("Choose category(1-3): ");
+        int category = scanner.nextInt();
+        scanner.nextLine();
+
+
+        System.out.println("==== Input New Book ====");
+        System.out.print("Enter title: ");
+        String title = scanner.nextLine();
+        System.out.print("Enter author: ");
+        String author = scanner.nextLine();
+        System.out.print("Enter stock: ");
+        int stock = scanner.nextInt();
+
+        String newBookId = Admin.generateId();
+
+
+        Book newBook = new Book(newBookId, title, author, String.valueOf(stock));
+        bookList.add(newBook);
+
+        System.out.println("New book added successfully.");
+    }
+
+    boolean isAdmin(){
+        if (adminUsername.equals("admin") && adminPassword.equals("admin")) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
     static void displayStudent(ArrayList<Student> students) {
         if (students.isEmpty()) {
@@ -13,9 +54,9 @@ public class Admin {
         System.out.println("==== Registered Students ====");
         for (Student student : students) {
             System.out.println("Name: " + student.name);
-            System.out.println("NIM: " + student.nim);
             System.out.println("Faculty: " + student.faculty);
-            System.out.println("Program Studi: " + student.programStudi);
+            System.out.println("NIM: " + student.nim);
+            System.out.println("Program: " + student.programStudi);
             System.out.println("-----------------------------");
         }
     }
@@ -46,5 +87,16 @@ public class Admin {
 
         System.out.println("Student added successfully.");
     }
+
+    static String generateId() {
+        String id1 = UUID.randomUUID().toString().substring(0, 4);
+        String id2 = UUID.randomUUID().toString().substring(0, 4);
+        String id3 = UUID.randomUUID().toString().substring(0, 4);
+
+        String id = id1 + "-" + id2 + "-" + id3;
+        return id;
+    }
+
+
 }
 
