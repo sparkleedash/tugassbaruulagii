@@ -1,6 +1,7 @@
 package data;
 
 import com.main.Main;
+import exception.custom.IllegalAdminAccess;
 import util.iMenu;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class Admin extends User implements iMenu {
                 System.out.println("5. Kembali ke menu awal");
                 System.out.print("Pilihan anda: ");
                 int choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                scanner.nextLine();
 
                 switch (choice) {
                     case 1:
@@ -74,14 +75,14 @@ public class Admin extends User implements iMenu {
                         inputValid = true;
                     } else if (lanjutkan.equalsIgnoreCase("n")) {
                         System.out.println("TERIMA KASIH SUDAH MENGGUNAKAN PROGRAM INI");
-                        return;  // Exit the method to stop the loop
+                        return;
                     } else {
                         System.out.println("Masukkan inputan yang valid!");
                     }
                 }
             } catch (InputMismatchException e) {
                 System.err.println("Input tidak valid. Harap masukkan angka.");
-                scanner.nextLine(); // Clear the invalid input
+                scanner.nextLine();
             }
         }
     }
@@ -92,29 +93,33 @@ public class Admin extends User implements iMenu {
         main.menu();
     }
 
-    public boolean menuAdmin() {
-        String inputUsn;
+    public boolean menuAdmin() throws IllegalAdminAccess {
+        String inputUser;
         String inputPass;
 
         boolean isAdminLoggedIn = false;
 
+        Scanner scanner = new Scanner(System.in);
+        ArrayList<Student> studentList = new ArrayList<>();
+
         do {
             System.out.print("Username: ");
-            inputUsn = scanner.next();
+            inputUser = scanner.next();
             System.out.print("Password: ");
             inputPass = scanner.next();
+            isAdminLoggedIn = Admin.isAdmin(inputUser, inputPass);
 
-            isAdminLoggedIn = Admin.isAdmin(inputUsn, inputPass);
+            if (isAdminLoggedIn) {
 
-            if (!isAdminLoggedIn) {
-                System.out.println("Masukkan username dan password yang benar!");
-            } else {
-                menu(studentList);
-
+                Admin admin = Admin.getInstance();
+                admin.menu(studentList);
             }
         } while (!isAdminLoggedIn);
+
+        scanner.close();
         return isAdminLoggedIn;
     }
+
 
     public boolean menuStudent() {
         System.out.println("====== LOGIN AS STUDENT ======");
